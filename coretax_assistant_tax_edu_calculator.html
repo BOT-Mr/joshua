@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perhitungan Pajak</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      width: 400px;
+      padding: 16px;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .app-header {
+      text-align: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .app-header h3 {
+      font-size: 16px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .app-header p {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* Tab Menu */
+    .tab-menu {
+      display: flex;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      background: none;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 12px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .btn.primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn.primary:hover {
+      background: #1d4ed8;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Downloader Section */
+    .selection-control {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+    .file-list {
+      max-height: 130px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .empty-msg {
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      padding: 12px 4px;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .file-item input {
+      cursor: pointer;
+    }
+    .file-item label {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* Form & Controls */
+    .form-group {
+      margin-bottom: 8px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #475569;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    /* Result Box */
+    .result-card {
+      background: #1e293b;
+      color: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .result-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+    }
+    .result-card h2 {
+      font-size: 18px;
+      color: #38bdf8;
+      margin-top: 4px;
+    }
+
+    /* Educational Box */
+    .edu-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: #1e3a8a;
+    }
+    .edu-box h4 {
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edu-box p {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .law-text {
+      font-style: italic;
+      color: #475569;
+      font-size: 10.5px;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dashed #bfdbfe;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <h3>Coretax Assistant & Tax Edu</h3>
+    <p>Alat Rekap PDF & Kalkulator Pajak Indonesia</p>
+  </div>
+
+  <div class="tab-menu">
+    <button class="tab-btn active" data-tab="calculator">Kalkulator & Edukasi</button>
+    <button class="tab-btn" data-tab="downloader">Downloader & Rekap</button>
+  </div>
+
+  <!-- PANEL 1: Kalkulator -->
+  <div id="calculator" class="tab-content active">
+    <div class="form-group">
+      <label for="tax-type">Pilih Jenis Pajak / Objek Transaksi:</label>
+      <select id="tax-type">
+        <option value="pph21_tetap">PPh 21 Pegawai Tetap (TER Bulanan)</option>
+        <option value="pph21_tidak_tetap">PPh 21 Pegawai Tidak Tetap</option>
+        <option value="pph21_komisi">PPh 21 Non-Pegawai / Komisi</option>
+        <option value="pph22">PPh Pasal 22 (DPP & Tarif)</option>
+        <option value="pph23">PPh Pasal 23 (Jasa, Sewa, Dividen, dll)</option>
+        <option value="pph24">PPh Pasal 24 (Estimasi Kredit Luar Negeri)</option>
+        <option value="pph25">PPh Pasal 25 (Angsuran Bulanan)</option>
+        <option value="pph26">PPh Pasal 26 (Subjek Pajak Luar Negeri)</option>
+        <option value="pph_final_42">PPh Final Pasal 4 ayat (2)</option>
+        <option value="ppn">PPN (Pajak Pertambahan Nilai)</option>
+        <option value="pph_badan">PPh Badan (Perusahaan / PKP)</option>
+      </select>
+    </div>
+
+    <div id="dynamic-inputs"></div>
+
+    <div class="result-card">
+      <span class="result-label">Estimasi Perhitungan:</span>
+      <h2 id="calc-result">Rp 0</h2>
+    </div>
+
+    <!-- KOTAK EDUKASI & DASAR HUKUM -->
+    <div class="edu-box" id="edu-box">
+      <h4>📚 Logika Teori & Dasar Hukum</h4>
+      <p id="edu-theory">Pilih jenis pajak di atas untuk melihat penjelasan logika dan dasar hukumnya.</p>
+      <p id="edu-law" class="law-text"></p>
+    </div>
+  </div>
+
+  <!-- PANEL 2: DOWNLOADER & REKAP -->
+  <div id="downloader" class="tab-content">
+    <button id="scan-btn" class="btn primary">🔍 Scan Dokumen PDF Halaman</button>
+    
+    <div class="selection-control hidden" id="selection-control">
+      <label><input type="checkbox" id="select-all"> Pilih Semua</label>
+      <span id="selected-count">0 terpilih</span>
+    </div>
+
+    <div id="file-list" class="file-list">
+      <p class="empty-msg">Klik tombol <b>Scan Dokumen</b> untuk memindai tautan PDF atau Bukti Potong pada halaman Coretax yang sedang aktif.</p>
+    </div>
+
+    <div class="action-buttons">
+      <button id="btn-download-selected" class="btn" disabled>📥 Unduh Terpilih</button>
+      <button id="btn-export-csv" class="btn" disabled>📊 Ekspor CSV</button>
+      <button id="btn-download-zip" class="btn" disabled>📦 Download ZIP + CSV</button>
+    </div>
+  </div>
+
+  <script>
+    // Tab Navigation Logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Dummy Scan Downloader Logic
+    let detectedFiles = [];
+    document.getElementById('scan-btn').addEventListener('click', () => {
+      // Simulasi deteksi dokumen
+      detectedFiles = [
+        { id: 1, title: 'Bukti_Potong_PPh21_Januari_2024.pdf', url: '#' },
+        { id: 2, title: 'Faktur_Pajak_Keluaran_0100000123.pdf', url: '#' },
+        { id: 3, title: 'Bukti_Potong_PPh23_PT_Maju_Jaya.pdf', url: '#' }
+      ];
+      renderFileList();
+    });
+
+    function renderFileList() {
+      const container = document.getElementById('file-list');
+      container.innerHTML = '';
+      document.getElementById('selection-control').classList.remove('hidden');
+
+      detectedFiles.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+          <input type="checkbox" id="pdf-${idx}" data-idx="${idx}">
+          <label for="pdf-${idx}">${file.title}</label>
+        `;
+        container.appendChild(item);
+      });
+
+      document.querySelectorAll('#file-list input').forEach(cb => cb.addEventListener('change', updateSelection));
+      updateSelection();
+    }
+
+    document.getElementById('select-all').addEventListener('change', (e) => {
+      document.querySelectorAll('#file-list input').forEach(cb => cb.checked = e.target.checked);
+      updateSelection();
+    });
+
+    function updateSelection() {
+      const selected = document.querySelectorAll('#file-list input:checked');
+      const count = selected.length;
+      document.getElementById('selected-count').innerText = `${count} terpilih`;
+      
+      const disabled = count === 0;
+      document.getElementById('btn-download-selected').disabled = disabled;
+      document.getElementById('btn-export-csv').disabled = disabled;
+      document.getElementById('btn-download-zip').disabled = disabled;
+    }
+
+    // Dynamic Calculator Data & Legal Explanations
+    const taxDataConfig = {
+      pph21_tetap: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Bruto Sebulan (Rp):</label><input type="number" id="bruto" placeholder="0"></div>
+          <div class="form-group">
+            <label>Kategori TER Bulanan:</label>
+            <select id="ter_cat">
+              <option value="A">Kategori A (PTKP TK/0, TK/1, K/0)</option>
+              <option value="B">Kategori B (PTKP TK/2, TK/3, K/1, K/2)</option>
+              <option value="C">Kategori C (PTKP K/3)</option>
+            </select>
+          </div>`,
+        theory: "PPh 21 Pegawai Tetap dihitung menggunakan metode Tarif Efektif Rata-rata (TER) bulanan dari penghasilan bruto. Metode ini menyederhanakan pemotongan pajak bulanan tanpa perlu menghitung biaya jabatan hingga masa pajak terakhir.",
+        law: "Dasar Hukum: PP No. 58 Tahun 2023 & PMK No. 168 Tahun 2023."
+      },
+      pph21_tidak_tetap: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Bruto (Rp):</label><input type="number" id="bruto" placeholder="0"></div>
+          <div class="form-group"><label>Skema Pembayaran:</label><select id="mode"><option value="harian">Harian (Batas Non-Pajak Rp 2.500.000)</option><option value="bulanan">Bulanan</option></select></div>`,
+        theory: "Pemotongan pajak bagi pekerja lepas/harian yang dibayarkan secara tidak tetap berdasarkan ambang batas harian atau bulanan.",
+        law: "Dasar Hukum: Pasal 21 UU PPh jo. PMK No. 168 Tahun 2023."
+      },
+      pph21_komisi: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Bruto Komisi (Rp):</label><input type="number" id="bruto" placeholder="0"></div>
+          <div class="form-group"><label>Kategori:</label><select id="berkesinambungan"><option value="ya">Berkesinambungan (50% x Bruto x Tarif Pas 17)</option><option value="tidak">Tidak Berkesinambungan</option></select></div>`,
+        theory: "Pemotongan atas penghasilan tenaga ahli/bukan pegawai yang menerima komisi. DPP dihitung sebesar 50% dari bruto sebagai norma penghasilan netto.",
+        law: "Dasar Hukum: Pasal 21 UU PPh jo. UU HPP."
+      },
+      pph22: {
+        formHtml: `
+          <div class="form-group"><label>Nilai Transaksi / DPP (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group"><label>Tarif PPh 22 (%):</label><input type="number" id="tarif" value="1.5" step="0.1"></div>`,
+        theory: "Pajak yang dipungut oleh bendahara pemerintah, badan tertentu, atau pengimpor atas pembelian barang, impor, atau penjualan barang sangat mewah.",
+        law: "Dasar Hukum: Pasal 22 UU PPh jo. PMK terkait pemungutan PPh 22."
+      },
+      pph23: {
+        formHtml: `
+          <div class="form-group"><label>Nilai Bruto / DPP (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group">
+            <label>Jenis Jasa / Objek Pajak:</label>
+            <select id="jenis_jasa">
+              <option value="0.02">Jasa Teknik, Manajemen, Konsultan, Sewa (2%)</option>
+              <option value="0.15">Dividen, Bunga, Royalti, Hadiah (15%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label><input type="checkbox" id="no_npwp"> Tidak Punya NPWP / NIK (Tarif +100%)</label></div>`,
+        theory: "Pemotongan atas modal, penyerahan jasa, atau hadiah. Negara menerapkan withholding system agar pajak dipotong di muka oleh pemberi penghasilan.",
+        law: "Dasar Hukum: Pasal 23 UU PPh jo. UU HPP."
+      },
+      pph24: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Luar Negeri (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group"><label>Estimasi Tarif Pajak LN (%):</label><input type="number" id="tarif" value="20"></div>`,
+        theory: "Kredit pajak luar negeri yang dapat dikreditkan terhadap pajak terutang di Indonesia untuk menghindari pengenaan pajak ganda (Double Taxation).",
+        law: "Dasar Hukum: Pasal 24 UU PPh."
+      },
+      pph25: {
+        formHtml: `
+          <div class="form-group"><label>PPh Terutang Tahun Lalu (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group"><label>Kredit Pajak Tahun Lalu (Rp):</label><input type="number" id="kredit" placeholder="0"></div>`,
+        theory: "Angsuran PPh bulanan dalam tahun berjalan yang dihitung dari pajak terutang tahun sebelumnya dikurangi kredit pajak dibagi 12 bulan.",
+        law: "Dasar Hukum: Pasal 25 UU PPh."
+      },
+      pph26: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Bruto (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group"><label>Tarif Pajak (%):</label><input type="number" id="tarif" value="20"></div>`,
+        theory: "Pemotongan atas penghasilan yang bersumber dari Indonesia yang diterima Wajib Pajak Luar Negeri (WPLN) selain Bentuk Usaha Tetap (BUT).",
+        law: "Dasar Hukum: Pasal 26 UU PPh jo. P3B (Tax Treaty)."
+      },
+      pph_final_42: {
+        formHtml: `
+          <div class="form-group"><label>Nilai Bruto Transaksi (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group">
+            <label>Jenis Objek Final:</label>
+            <select id="tarif_final">
+              <option value="0.10">Sewa Tanah & Bangunan (10%)</option>
+              <option value="0.0275">Jasa Konstruksi Pelaksanaan (2.75%)</option>
+              <option value="0.005">PP 55 UMKM (0.5%)</option>
+            </select>
+          </div>`,
+        theory: "Pajak final bersifat selesai di mana kewajiban perpajakannya dianggap tuntas saat pemotongan/penyetoran dilakukan tanpa diperhitungkan ulang di SPT Tahunan.",
+        law: "Dasar Hukum: Pasal 4 ayat (2) UU PPh & Peraturan Pemerintah Terkait."
+      },
+      ppn: {
+        formHtml: `
+          <div class="form-group"><label>Dasar Pengenaan Pajak (DPP) (Rp):</label><input type="number" id="dpp" placeholder="0"></div>
+          <div class="form-group">
+            <label>Tarif PPN:</label>
+            <select id="tarif_ppn">
+              <option value="0.11">11% (Tarif Standar UU HPP)</option>
+              <option value="0.12">12% (Tarif Berlaku)</option>
+              <option value="0.011">Besaran Tertentu (1.1%)</option>
+            </select>
+          </div>`,
+        theory: "Pajak atas konsumsi Barang/Jasa Kena Pajak di dalam Daerah Pabean yang dipungut secara bertingkat di setiap rantai transaksi.",
+        law: "Dasar Hukum: UU PPN No. 8 Tahun 1983 jo. UU Harmonisasi Peraturan Perpajakan (UU HPP)."
+      },
+      pph_badan: {
+        formHtml: `
+          <div class="form-group"><label>Penghasilan Kena Pajak (PKP) (Rp):</label><input type="number" id="pkp" placeholder="0"></div>
+          <div class="form-group">
+            <label>Fasilitas / Skema Pajak:</label>
+            <select id="skema_badan">
+              <option value="normal">Tarif Umum Badan (22%)</option>
+              <option value="31e">Fasilitas Pasal 31E (Diskon 50% hingga omzet Rp 4.8M)</option>
+              <option value="umkm">PP 55 UMKM (0.5% dari Omzet Bruto)</option>
+            </select>
+          </div>`,
+        theory: "Pajak atas penghasilan bersih (laba fiskal) badan usaha setelah dikurangi biaya operasional yang diperbolehkan secara perpajakan.",
+        law: "Dasar Hukum: Pasal 17 ayat (1) huruf b jo. Pasal 31E UU PPh."
+      }
+    };
+
+    const taxSelect = document.getElementById('tax-type');
+    const dynamicInputs = document.getElementById('dynamic-inputs');
+
+    function loadTaxForm() {
+      const val = taxSelect.value;
+      const config = taxDataConfig[val];
+      
+      dynamicInputs.innerHTML = config.formHtml;
+      document.getElementById('edu-theory').innerText = config.theory;
+      document.getElementById('edu-law').innerText = config.law;
+
+      dynamicInputs.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', calculateTax);
+      });
+      calculateTax();
+    }
+
+    function calculateTax() {
+      const val = taxSelect.value;
+      let tax = 0;
+
+      if (val === 'pph21_tetap') {
+        const bruto = parseFloat(document.getElementById('bruto')?.value) || 0;
+        const cat = document.getElementById('ter_cat')?.value;
+        let rate = cat === 'A' ? 0.015 : (cat === 'B' ? 0.025 : 0.07);
+        tax = bruto * rate;
+      } else if (val === 'pph21_tidak_tetap' || val === 'pph21_komisi') {
+        const bruto = parseFloat(document.getElementById('bruto')?.value) || 0;
+        tax = bruto * 0.5 * 0.05;
+      } else if (val === 'pph23') {
+        const dpp = parseFloat(document.getElementById('dpp')?.value) || 0;
+        let rate = parseFloat(document.getElementById('jenis_jasa')?.value) || 0.02;
+        if (document.getElementById('no_npwp')?.checked) rate *= 2;
+        tax = dpp * rate;
+      } else if (val === 'ppn') {
+        const dpp = parseFloat(document.getElementById('dpp')?.value) || 0;
+        const rate = parseFloat(document.getElementById('tarif_ppn')?.value) || 0.11;
+        tax = dpp * rate;
+      } else if (val === 'pph_final_42') {
+        const dpp = parseFloat(document.getElementById('dpp')?.value) || 0;
+        const rate = parseFloat(document.getElementById('tarif_final')?.value) || 0.10;
+        tax = dpp * rate;
+      } else if (val === 'pph25') {
+        const dpp = parseFloat(document.getElementById('dpp')?.value) || 0;
+        const kredit = parseFloat(document.getElementById('kredit')?.value) || 0;
+        tax = Math.max(0, (dpp - kredit) / 12);
+      } else if (val === 'pph_badan') {
+        const pkp = parseFloat(document.getElementById('pkp')?.value) || 0;
+        const skema = document.getElementById('skema_badan')?.value;
+        if (skema === '31e') tax = pkp * 0.11;
+        else if (skema === 'umkm') tax = pkp * 0.005;
+        else tax = pkp * 0.22;
+      } else {
+        const dpp = parseFloat(document.getElementById('dpp')?.value) || 0;
+        const tarif = (parseFloat(document.getElementById('tarif')?.value) || 0) / 100;
+        tax = dpp * tarif;
+      }
+
+      document.getElementById('calc-result').innerText = `Rp ${Math.round(tax).toLocaleString('id-ID')}`;
+    }
+
+    taxSelect.addEventListener('change', loadTaxForm);
+    document.addEventListener('DOMContentLoaded', loadTaxForm);
+  </script>
+</body>
+</html>
